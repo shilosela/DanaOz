@@ -11,7 +11,7 @@ namespace DanaOz.DAL.Entities
         public int? UserId { get; set; }
 
         [Required]
-        [MaxLength(20)]
+        [MaxLength(50)]
         public string PhoneNumber { get; set; }
 
         [MaxLength(20)]
