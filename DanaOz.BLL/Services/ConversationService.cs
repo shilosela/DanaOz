@@ -85,7 +85,8 @@ namespace DanaOz.BLL.Services
                 return new BotResponseModel
                 {
                     PhoneNumber = incomingMessage.PhoneNumber,
-                    MessageText = "ERROR: " + ex.Message + " | " + ex.InnerException?.Message,
+                    //MessageText = "ERROR: " + ex.Message + " | " + ex.InnerException?.Message,
+                    MessageText = "אוי, סליחה! חוויתי עומס רגעי. אנא נסה שוב בעוד כמה שניות",
                     Success = false,
                     ErrorMessage = ex.Message
                 };
