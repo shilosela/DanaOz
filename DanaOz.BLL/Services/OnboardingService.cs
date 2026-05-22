@@ -24,6 +24,15 @@ namespace DanaOz.BLL.Services
             { 32, "גיאוגרפיה" },
         };
 
+        // Subjects ordered by relevance per school type (1=Elementary, 2=Middle, 3=High, 4=Other)
+        private static readonly Dictionary<int, List<int>> SubjectsBySchoolType = new()
+        {
+            { 1, new List<int> { 21, 10, 20, 14, 30, 32, 31, 11, 13 } },           // Elementary  – no chemistry
+            { 2, new List<int> { 10, 21, 20, 14, 13, 11, 30, 31, 32, 12 } },       // Middle School
+            { 3, new List<int> { 10, 11, 12, 13, 20, 21, 30, 31, 32, 14 } },       // High School
+            { 4, new List<int> { 10, 11, 12, 13, 14, 20, 21, 30, 31, 32 } },       // Other
+        };
+
         private static readonly Dictionary<int, string> GradeNames = new()
         {
             { 1,  "א'"   }, { 2,  "ב'"   }, { 3,  "ג'"   }, { 4,  "ד'"   },
@@ -81,7 +90,7 @@ namespace DanaOz.BLL.Services
 
                     await _userSettingsRepository.SetAsync(user.UserId, "ob_school_types", string.Join(",", schoolTypes));
                     await _userRepository.UpdateOnboardingStepAsync(user.UserId, 4);
-                    return SubjectQuestion();
+                    return SubjectQuestion(schoolTypes);
 
                 // ── Step 4: Collect Subject(s) ────────────────────────────────
                 case 4:
@@ -267,24 +276,55 @@ namespace DanaOz.BLL.Services
             "אם את/ה מלמד/ת ביותר מסוג אחד, ניתן לכתוב כמה מספרים.\n" +
             "למשל: \"2 3\" לחטיבת ביניים ותיכון.";
 
-        private static string SubjectQuestion() =>
-            "איזה מקצוע/ות את/ה מלמד/ת?\n\n" +
-            "🔬 *מדעים*\n" +
-            "10 - מתמטיקה\n" +
-            "11 - מדעי המחשב\n" +
-            "12 - כימיה\n" +
-            "13 - ביולוגיה\n" +
-            "14 - מדעים כלליים\n\n" +
-            "🌍 *שפות ותקשורת*\n" +
-            "20 - אנגלית\n" +
-            "21 - עברית\n\n" +
-            "📜 *מדעי הרוח והחברה*\n" +
-            "30 - היסטוריה\n" +
-            "31 - אזרחות\n" +
-            "32 - גיאוגרפיה\n\n" +
-            "אם המקצוע שלך לא מופיע ברשימה, פשוט כתוב/י את שמו ושלח/י אלינו.\n\n" +
-            "אם את/ה מלמד/ת יותר ממקצוע אחד, ניתן לכתוב את המספרים ברצף.\n" +
-            "למשל: \"20 21\" לאנגלית ועברית.";
+        private static string SubjectQuestion(List<int> schoolTypes)
+        {
+            // Union subjects for all selected school types, preserving priority order, capped at 10
+            var ordered = schoolTypes
+                .Where(SubjectsBySchoolType.ContainsKey)
+                .SelectMany(t => SubjectsBySchoolType[t])
+                .Distinct()
+                .Take(10)
+                .ToList();
+
+            // Fall back to all subjects if school type unknown
+            if (!ordered.Any())
+                ordered = SubjectNames.Keys.OrderBy(k => k).ToList();
+
+            var sb = new System.Text.StringBuilder("איזה מקצוע/ות את/ה מלמד/ת?\n\n");
+
+            var science = ordered.Where(s => s >= 10 && s <= 14).OrderBy(s => s).ToList();
+            if (science.Any())
+            {
+                sb.AppendLine("🔬 *מדעים*");
+                foreach (var code in science)
+                    sb.AppendLine($"{code} - {SubjectNames[code]}");
+                sb.AppendLine();
+            }
+
+            var languages = ordered.Where(s => s >= 20 && s <= 21).OrderBy(s => s).ToList();
+            if (languages.Any())
+            {
+                sb.AppendLine("🌍 *שפות ותקשורת*");
+                foreach (var code in languages)
+                    sb.AppendLine($"{code} - {SubjectNames[code]}");
+                sb.AppendLine();
+            }
+
+            var humanities = ordered.Where(s => s >= 30 && s <= 32).OrderBy(s => s).ToList();
+            if (humanities.Any())
+            {
+                sb.AppendLine("📜 *מדעי הרוח והחברה*");
+                foreach (var code in humanities)
+                    sb.AppendLine($"{code} - {SubjectNames[code]}");
+                sb.AppendLine();
+            }
+
+            sb.AppendLine("אם המקצוע שלך לא מופיע ברשימה, פשוט כתוב/י את שמו ושלח/י אלינו.\n");
+            sb.Append("אם את/ה מלמד/ת יותר ממקצוע אחד, ניתן לכתוב את המספרים ברצף.\n");
+            sb.Append("למשל: \"20 21\" לאנגלית ועברית.");
+
+            return sb.ToString();
+        }
 
         private static string ClassGradeQuestion(string schoolName) =>
             $"בואי נתחיל עם הכיתה הראשונה שאת/ה מלמד/ת ב{schoolName}. 📖\n\n" +
