@@ -39,6 +39,7 @@ namespace DanaOz.DAL.Entities
         // Navigation properties
         public ICollection<UserSetting> Settings { get; set; }
         public ICollection<UserClass> Classes { get; set; }
+        public ICollection<UserSchool> Schools { get; set; }
         public ICollection<ChatLog> ChatLogs { get; set; }
         public ICollection<UserPoints> Points { get; set; }
         public ICollection<UserReminderSettings> ReminderSettings { get; set; }

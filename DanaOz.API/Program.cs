@@ -7,13 +7,13 @@ using Twilio.AspNet.Core;
 var builder = WebApplication.CreateBuilder(args);
 
 // =====================
-// DAL — Database
+// DAL ï¿½ Database
 // =====================
 builder.Services.AddDbContext<DanaOzDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("SupabaseConnection")));
 
 // =====================
-// DAL — Repositories
+// DAL ï¿½ Repositories
 // =====================
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<ChatLogRepository>();
@@ -22,9 +22,10 @@ builder.Services.AddScoped<UserPointsRepository>();
 builder.Services.AddScoped<UserMaterialRepository>();
 builder.Services.AddScoped<ReminderRepository>();
 builder.Services.AddScoped<UserSettingsRepository>();
+builder.Services.AddScoped<UserSchoolRepository>();
 
 // =====================
-// BLL — Services
+// BLL ï¿½ Services
 // =====================
 builder.Services.AddScoped<ConversationService>();
 builder.Services.AddScoped<OnboardingService>();

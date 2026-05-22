@@ -23,6 +23,7 @@ namespace DanaOz.DAL.Context
         public DbSet<ChatLog> Chat_Logs { get; set; }
         public DbSet<UserPoints> User_Points { get; set; }
         public DbSet<UserMaterial> User_Materials { get; set; }
+        public DbSet<UserSchool> User_Schools { get; set; }
         public DbSet<Commercial> Commercials { get; set; }
         public DbSet<UserCommercialHistory> User_CommercialsHistory { get; set; }
 
@@ -42,6 +43,7 @@ namespace DanaOz.DAL.Context
             modelBuilder.Entity<ChatLog>().ToTable("Chat_Logs");
             modelBuilder.Entity<UserPoints>().ToTable("User_Points");
             modelBuilder.Entity<UserMaterial>().ToTable("User_Materials");
+            modelBuilder.Entity<UserSchool>().ToTable("User_Schools");
             modelBuilder.Entity<Commercial>().ToTable("Commercials");
             modelBuilder.Entity<UserCommercialHistory>().ToTable("User_CommercialsHistory");
         }
